@@ -2,6 +2,7 @@
 #include <random>
 
 #include <tool_point_calibration/tool_point_calibration.h>
+#include <gtest/gtest.h>
 
 using Affine3dVector = std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>>;
 
@@ -37,14 +38,14 @@ Affine3dVector makeFakePoses(const Eigen::Vector3d& center, const Eigen::Affine3
                                                                                              random_normal_number());
         vector.push_back(toolpt);
 
-        std::cout << "TOOL:\n" << toolpt.matrix() << "\n";
+        // std::cout << "TOOL:\n" << toolpt.matrix() << "\n";
     }
 
     return vector;
 }
 
 
-int main()
+TEST(tcp_calibration, initial_tests)
 {
     Eigen::Affine3d tool_def;
     tool_def = Eigen::Translation3d(0.5, 0.25, 0) *
@@ -69,4 +70,8 @@ int main()
     std::cout << "Touch point: " << result.tcp_offset.transpose() << "\n";
     std::cout << "Avg Residual: " << result.average_residual << "\n";
     std::cout << "Converged?: " << result.converged << "\n";
+
+    double delta = (result.tcp_offset - tool_def.translation()).norm();
+
+    EXPECT_TRUE(std::abs(delta) < 0.005);
 }

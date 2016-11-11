@@ -162,7 +162,8 @@ target_link_libraries(tool_point_calibration
 #############
 
 ## Add gtest based cpp test target and link libraries
-catkin_add_gtest(${PROJECT_NAME}-test 
+catkin_add_gtest(${PROJECT_NAME}-test
+  test/utest.cpp
   test/test_tool.cpp
 )
 if(TARGET ${PROJECT_NAME}-test)
