@@ -67,7 +67,7 @@ TEST(tcp_calibration, initial_tests)
             tool_point_calibration::calibrateTcp(points);
 
     std::cout << "TCP: " << result.tcp_offset.transpose() << "\n";
-    std::cout << "Touch point: " << result.tcp_offset.transpose() << "\n";
+    std::cout << "Touch point: " << result.touch_point.transpose() << "\n";
     std::cout << "Avg Residual: " << result.average_residual << "\n";
     std::cout << "Converged?: " << result.converged << "\n";
 

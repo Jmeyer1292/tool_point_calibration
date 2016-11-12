@@ -4,7 +4,10 @@ project(tool_point_calibration)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  tf
+  tf_conversions
+)
 find_package(Ceres REQUIRED)
 find_package(Eigen3 REQUIRED)
 
@@ -108,7 +111,7 @@ catkin_package(
 ## Build ##
 ###########
 
-include_directories(include ${EIGEN3_INCLUDE_DIRS})
+include_directories(include ${EIGEN3_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS})
 add_definitions(-std=c++11)
 
 add_library(tool_point_calibration
@@ -121,6 +124,19 @@ target_link_libraries(tool_point_calibration
   ${catkin_LIBRARIES}
   ${CERES_LIBRARIES}
 )
+
+add_executable(console_calibration
+  src/console_calibration.cpp
+)
+
+add_dependencies(console_calibration ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(console_calibration
+  ${catkin_LIBRARIES}
+  ${CERES_LIBRARIES}
+  tool_point_calibration
+)
+
 
 #############
 ## Install ##
