@@ -8,24 +8,36 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "console_tool_calibration");
   ros::NodeHandle pnh ("~");
 
+  // Load user parmameters
   std::string base_frame, tool0_frame;
+  int num_samples;
 
-  pnh.param<std::string>("base_frame", base_frame, "base_frame");
+  pnh.param<std::string>("base_frame", base_frame, "base_link");
   pnh.param<std::string>("tool0_frame", tool0_frame, "tool0");
+  pnh.param<int>("num_samples", num_samples, 4);
 
+  ROS_INFO("Starting tool calibration with base frame: '%s' and tool0 frame: '%s'.",
+           base_frame.c_str(), tool0_frame.c_str());
+  ROS_INFO("Move the robot to '%d' different poses, each of which should touch"
+           " the tool to the same position in space.\n", num_samples);
+
+  // Create a transform listener to query tool frames
   tf::TransformListener listener;
 
+  // Create storage for user observations
   tool_point_calibration::Affine3dVector observations;
+  observations.reserve(num_samples);
 
-  ros::AsyncSpinner spinner (1); // required for listener to operate in background?
   std::string line;
   int count = 0;
-  while (pnh.ok() && count < 5)
+
+  // While ros is ok and there are more counts to be done...
+  while (ros::ok() && count < num_samples)
   {
+    ROS_INFO("Pose %d: Jog robot to a new location touching the shared position and"
+             " press enter.", count);
+
     std::getline(std::cin, line);
-
-    ROS_INFO("Attempting to capture robot tool frame pose");
-
 
     tf::StampedTransform transform;
     try
@@ -38,27 +50,27 @@ int main(int argc, char** argv)
 
       observations.push_back(eigen_pose);
 
-      ROS_INFO_STREAM("Captured robot pose:\n" << eigen_pose.matrix());
-
+      ROS_INFO_STREAM("Pose " << count << ": captured transform:\n" << eigen_pose.matrix());
       count++;
     }
-    catch (tf::TransformException ex)
+    catch (const tf::TransformException& ex)
     {
       ROS_ERROR("%s",ex.what());
       ros::Duration(1.0).sleep();
       continue;
     }
-
   }
 
-    ROS_INFO("Performing calibration");
-    tool_point_calibration::TcpCalibrationResult result =
-        tool_point_calibration::calibrateTcp(observations);
+  ROS_INFO("Calibration captured %d tool poses (out of %d requested). Computing calibration...",
+           count, num_samples);
 
-    std::cout << "TCP: " << result.tcp_offset.transpose() << "\n";
-    std::cout << "Touch point: " << result.touch_point.transpose() << "\n";
-    std::cout << "Avg Residual: " << result.average_residual << "\n";
-    std::cout << "Converged?: " << result.converged << "\n";
+  tool_point_calibration::TcpCalibrationResult result =
+      tool_point_calibration::calibrateTcp(observations);
+
+  ROS_INFO_STREAM("Calibrated tcp (meters in xyz): [" << result.tcp_offset.transpose() << "] from " << tool0_frame);
+  ROS_INFO_STREAM("Touch point (meters in xyz): [" << result.touch_point.transpose() << "] in frame " << base_frame);
+  ROS_INFO_STREAM("Average residual: " << result.average_residual);
+  ROS_INFO_STREAM("Converged: " << result.converged);
 
   return 0;
 }
