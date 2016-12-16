@@ -1,0 +1,11 @@
+<launch>
+  <arg name="base_frame" default="base_link"/>
+  <arg name="tool0_frame" default="tool0"/>
+  <arg name="num_samples" default="4"/>
+
+  <node name="console_tcp_calibration" pkg="tool_point_calibration" type="console_calibration" output="screen">
+    <param name="base_frame" value="$(arg base_frame)"/>
+    <param name="tool0_frame" value="$(arg tool0_frame)"/>
+    <param name="num_samples" value="$(arg num_samples)"/>
+  </node>
+</launch>
