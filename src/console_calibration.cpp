@@ -24,6 +24,36 @@ int main(int argc, char** argv)
   // Create a transform listener to query tool frames
   tf::TransformListener listener;
 
+  std::string error_msg;
+  if (!listener.waitForTransform(base_frame, tool0_frame, ros::Time(0),
+                                 ros::Duration(1.0), ros::Duration(0.01),
+                                 &error_msg))
+  {
+    ROS_WARN_STREAM("Unable to lookup transform between base frame: '" << base_frame
+                    << "' and tool frame: '" << tool0_frame << "'. TF reported error: "
+                    << error_msg);
+
+    bool base_found = listener.frameExists(base_frame);
+    bool tool_found = listener.frameExists(tool0_frame);
+
+    if (!base_found && !tool_found)
+    {
+      ROS_WARN("Check to make sure that a robot state publisher or other node is publishing"
+               " tf frames for your robot. Also check that your base/tool frames names are"
+               " correct and not missing a prefix, for example.");
+    }
+    else if (!base_found)
+    {
+      ROS_WARN("Check to make sure that base frame '%s' actually exists.", base_frame.c_str());
+    }
+    else if (!tool_found)
+    {
+      ROS_WARN("Check to make sure that tool0 frame '%s' actually exists.", tool0_frame.c_str());
+    }
+
+    return 1;
+  }
+
   // Create storage for user observations
   tool_point_calibration::Affine3dVector observations;
   observations.reserve(num_samples);
@@ -37,7 +67,7 @@ int main(int argc, char** argv)
     ROS_INFO("Pose %d: Jog robot to a new location touching the shared position and"
              " press enter.", count);
 
-    std::getline(std::cin, line);
+    std::getline(std::cin, line); // Blocks program until enter is pressed
 
     tf::StampedTransform transform;
     try
@@ -71,6 +101,13 @@ int main(int argc, char** argv)
   ROS_INFO_STREAM("Touch point (meters in xyz): [" << result.touch_point.transpose() << "] in frame " << base_frame);
   ROS_INFO_STREAM("Average residual: " << result.average_residual);
   ROS_INFO_STREAM("Converged: " << result.converged);
+
+  if (count < 4)
+  {
+    ROS_WARN("Computing a tool calibration w/ fewer than 4 points may produce an answer with good"
+             " convergence and residual error, but without a meaningful result. You are encouraged"
+             " to try with more points");
+  }
 
   return 0;
 }
