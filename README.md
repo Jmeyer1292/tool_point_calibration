@@ -21,7 +21,7 @@ To use:
   By default base frame is `base_frame`, tool0_frame is `tool0`, and num_samples is `4`. I recommend you use at least 4
   samples.
 
-  5. Jog the robot so that the tool you wish to calibrate is touching a known point in the world, such as the tip of a nail or the corner of a work-piece. When your happy, press enter in the console window from which you ran the tcp calibration routine. You should see a 4x4 matrix print out.
+  5. Jog the robot so that the tool you wish to calibrate is touching a known point in the world, such as the tip of a nail or the corner of a work-piece. When your're happy, press enter in the console window from which you ran the tcp calibration routine. You should see a 4x4 matrix print out.
 
   6. Repeat step 5 at least three more times. Each time approach the fixed point in the world from a different orientation. If you wish to abort early, control-C the node.
 
