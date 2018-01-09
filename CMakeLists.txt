@@ -15,7 +15,7 @@ catkin_package(
   CATKIN_DEPENDS tf tf_conversions
 )
 
-include_directories(include ${EIGEN3_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS})
 add_definitions(-std=c++11)
 
 # The core tool calibration library
